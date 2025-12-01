@@ -141,6 +141,7 @@ namespace Zenelejatszo
                         }
                         break;
 
+
                     // 5 – Új zene hozzáadása
                     case "5":
                         Console.Clear();
