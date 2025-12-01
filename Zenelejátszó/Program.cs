@@ -129,6 +129,7 @@ namespace Zenelejatszo
                         }
                         break;
 
+
                     // 4 – 3,5+ perces
                     case "4":
                         Console.Clear();
