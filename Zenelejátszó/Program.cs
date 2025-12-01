@@ -165,6 +165,7 @@ namespace Zenelejatszo
                         Console.WriteLine("Zene hozzáadva!");
                         break;
 
+
                     // 6 – Törlés
                     case "6":
                         Console.Clear();
