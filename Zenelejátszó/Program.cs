@@ -68,7 +68,6 @@ namespace Zenelejatszo
             }
         }
         static void Main(string[] args)
-
         {
             List<Zene> zenek = new List<Zene>();
             Beolvas(zenek);
@@ -87,6 +86,7 @@ namespace Zenelejatszo
 
                 string valasztas = Console.ReadLine() ?? "";
                 int sorszam = 0;
+
 
                 switch (valasztas)
                 {
