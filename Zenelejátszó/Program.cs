@@ -183,6 +183,7 @@ namespace Zenelejatszo
                             Console.WriteLine("Hibás index!");
                         break;
 
+
                     // 7 – Módosítás
                     case "7":
                         Console.Clear();
