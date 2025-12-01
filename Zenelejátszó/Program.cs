@@ -1,59 +1,221 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
-namespace Zenelejátszó
+namespace Zenelejatszo
 {
     internal class Program
     {
+        class Zene
+        {
+            public string Cim = "";
+            public string Eloado = "";
+            public string Mufaj = "";
+            public double HosszPerc;
+
+            public override string ToString()
+            {
+                return $"{Cim} - {Eloado} | {Mufaj} | {HosszPerc} perc";
+            }
+        }
+        static void Beolvas(List<Zene> zenek)
+        {
+            string fajl = "C:\\ujmappa\\playlist.txt";
+
+            if (!File.Exists(fajl))
+            {
+                Console.WriteLine("A fájl nem található: " + fajl);
+                Console.WriteLine("Üres lista indul.");
+                Console.ReadKey();
+                return;
+            }
+
+            using (StreamReader sr = new StreamReader(fajl))
+            {
+                sr.ReadLine(); // fejléc átugrása
+                string? sor;
+                while ((sor = sr.ReadLine()) != null)
+                {
+                    string[] adat = sor.Split(',');
+                    if (adat.Length == 4)
+                    {
+                        Zene z = new Zene();
+                        z.Cim = adat[0];
+                        z.Eloado = adat[1];
+                        z.Mufaj = adat[2];
+
+                        double h;
+                        if (double.TryParse(adat[3].Replace(",", "."), out h))
+                            z.HosszPerc = h;
+
+                        zenek.Add(z);
+                    }
+                }
+            }
+        }
+        static void Mentes(List<Zene> zenek)
+        {
+            string fajl = "C:\\ujmappa\\playlist.txt";
+
+            Directory.CreateDirectory("C:\\ujmappa");
+            
+            using (StreamWriter sw = new StreamWriter(fajl))
+            {
+                foreach (Zene z in zenek)
+                {
+                    sw.WriteLine($"{z.Cim};{z.Eloado};{z.Mufaj};{z.HosszPerc}");
+                }
+            }
+        }
         static void Main(string[] args)
         {
-            FileStream fs = new FileStream("C:\\ujmappa\\playlist.csv", FileMode.Open);
-            StreamReader rs = new StreamReader(fs);
+            List<Zene> zenek = new List<Zene>();
+            Beolvas(zenek);
 
-            List<string> zenel = new List<string>
-            {
-                
-            };
             while (true)
             {
                 Console.Clear();
                 Console.WriteLine("0 - Kilépés");
                 Console.WriteLine("1 - Zeneszámok betöltése listázása");
                 Console.WriteLine("2 - Keresés cím szerint");
-                Console.WriteLine("3 - Jelenítsd meg a Pop műfajú dalokat");
-                Console.WriteLine("4 - Csak az jelenjen meg ahol legalább 3,5 perc nél hosszabb a szám");
+                Console.WriteLine("3 - Pop műfajú dalok megjelenítése");
+                Console.WriteLine("4 - Legalább 3,5 perces zenék");
                 Console.WriteLine("5 - Új zene hozzáadása");
                 Console.WriteLine("6 - Zene törlése");
                 Console.WriteLine("7 - Zene módosítása");
-                string valasztas = Console.ReadLine();
+
+                string valasztas = Console.ReadLine() ?? "";
+                int sorszam = 0;
+
                 switch (valasztas)
                 {
+                    // Kilépés + mentés
                     case "0":
+                        Mentes(zenek);
                         return;
 
+                    // 1 – Listázás
                     case "1":
                         Console.Clear();
-                        int sorszam = 0;
-                        foreach (string nevek in zenel)
-                        {
-                            Console.WriteLine($"{sorszam++}. {nevek}");
-                        }
+                        sorszam = 0;
+                        foreach (var z in zenek)
+                            Console.WriteLine($"{sorszam++}. {z}");
                         break;
+
+                    // 2 – Keresés cím szerint
                     case "2":
                         Console.Clear();
-                        Console.WriteLine("Add meg a keresett cím egy részletét:");
-                        string keresettCim = Console.ReadLine();
-                        foreach (string nevek in zenel)
+                        Console.Write("Add meg a keresett cím részletét: ");
+                        string keres = (Console.ReadLine() ?? "").ToLower();
+
+                        sorszam = 0;
+                        foreach (var z in zenek)
                         {
-                            if (nevek.Contains(keresettCim, StringComparison.OrdinalIgnoreCase))
-                            {
-                                Console.WriteLine(nevek);
-                            }
+                            if (z.Cim.ToLower().Contains(keres))
+                                Console.WriteLine($"{sorszam++}. {z}");
                         }
                         break;
 
+                    // 3 – Pop zenék
+                    case "3":
+                        Console.Clear();
+                        sorszam = 0;
+                        foreach (var z in zenek)
+                        {
+                            if (z.Mufaj.ToLower() == "pop")
+                                Console.WriteLine($"{sorszam++}. {z}");
+                        }
+                        break;
 
-                }        
+                    // 4 – 3,5+ perces
+                    case "4":
+                        Console.Clear();
+                        sorszam = 0;
+                        foreach (var z in zenek)
+                        {
+                            if (z.HosszPerc >= 3.5)
+                                Console.WriteLine($"{sorszam++}. {z}");
+                        }
+                        break;
+
+                    // 5 – Új zene hozzáadása
+                    case "5":
+                        Console.Clear();
+                        Zene uj = new Zene();
+
+                        Console.Write("Cím: ");
+                        uj.Cim = Console.ReadLine() ?? "";
+
+                        Console.Write("Előadó: ");
+                        uj.Eloado = Console.ReadLine() ?? "";
+
+                        Console.Write("Műfaj: ");
+                        uj.Mufaj = Console.ReadLine() ?? "";
+
+                        Console.Write("Hossz percben: ");
+                        double hossz;
+                        double.TryParse(Console.ReadLine() ?? "0", out hossz);
+                        uj.HosszPerc = hossz;
+
+                        zenek.Add(uj);
+                        Console.WriteLine("Zene hozzáadva!");
+                        break;
+
+                    // 6 – Törlés
+                    case "6":
+                        Console.Clear();
+                        sorszam = 0;
+                        foreach (var z in zenek)
+                            Console.WriteLine($"{sorszam++}. {z}");
+
+                        Console.Write("Törlendő index: ");
+                        int torol;
+                        int.TryParse(Console.ReadLine() ?? "-1", out torol);
+
+                        if (torol >= 0 && torol < zenek.Count)
+                            zenek.RemoveAt(torol);
+                        else
+                            Console.WriteLine("Hibás index!");
+                        break;
+
+                    // 7 – Módosítás
+                    case "7":
+                        Console.Clear();
+                        sorszam = 0;
+                        foreach (var z in zenek)
+                            Console.WriteLine($"{sorszam++}. {z}");
+
+                        Console.Write("Módosítandó index: ");
+                        int mod;
+                        int.TryParse(Console.ReadLine() ?? "-1", out mod);
+
+                        if (mod >= 0 && mod < zenek.Count)
+                        {
+                            Console.Write("Új cím: ");
+                            zenek[mod].Cim = Console.ReadLine() ?? "";
+
+                            Console.Write("Új előadó: ");
+                            zenek[mod].Eloado = Console.ReadLine() ?? "";
+
+                            Console.Write("Új műfaj: ");
+                            zenek[mod].Mufaj = Console.ReadLine() ?? "";
+
+                            Console.Write("Új hossz: ");
+                            double.TryParse(Console.ReadLine() ?? "0", out hossz);
+                            zenek[mod].HosszPerc = hossz;
+
+                            Console.WriteLine("Zene módosítva!");
+                        }
+                        else
+                            Console.WriteLine("Hibás index!");
+                        break;
+
+                    default:
+                        Console.WriteLine("Rossz választás!");
+                        break;
+                }
+
+                Console.ReadKey();
             }
         }
     }
